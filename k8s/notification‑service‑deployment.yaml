@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: notification-service:latest
+          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
           ports:
             - containerPort: 9192
           env:

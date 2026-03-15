@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres
+          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
           env:
             - name: POSTGRES_DB
               value: StaffService

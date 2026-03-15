@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: service-registry
-          image: service-registry:latest
-          imagePullPolicy: Never  # Use local image in Minikube
+          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - containerPort: 8761

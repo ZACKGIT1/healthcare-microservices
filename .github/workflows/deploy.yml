@@ -1,0 +1,136 @@
+name: Microservices Build & Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'AnalyticsService/**'
+      - 'AppointmentService/**'
+      - 'AuditLoggingService/**'
+      - 'AuthenticationService/**'
+      - 'BillingClaimsService/**'
+      - 'ConfigServer/**'
+      - 'Gateway/**'
+      - 'InventoryService/**'
+      - 'NotificationService/**'
+      - 'PatientService/**'
+      - 'PharmacyService/**'
+      - 'ServiceRegistry/**'
+      - 'StaffService/**'
+      - 'k8s/**'
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 640083577712.dkr.ecr.us-east-1.amazonaws.com
+  EKS_CLUSTER: healthcare-production
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            analytics-service: 'AnalyticsService/**'
+            appointment-service: 'AppointmentService/**'
+            audit-logging-service: 'AuditLoggingService/**'
+            authentication-service: 'AuthenticationService/**'
+            billing-claims-service: 'BillingClaimsService/**'
+            config-server: 'ConfigServer/**'
+            gateway: 'Gateway/**'
+            inventory-service: 'InventoryService/**'
+            notification-service: 'NotificationService/**'
+            patient-service: 'PatientService/**'
+            pharmacy-service: 'PharmacyService/**'
+            service-registry: 'ServiceRegistry/**'
+            staff-service: 'StaffService/**'
+
+  build-and-deploy:
+    needs: changes
+    if: ${{ needs.changes.outputs.services != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.changes.outputs.services) }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        id: login-ecr
+
+      - name: Set Service Variables
+        run: |
+          # Map hyphenated service name back to PascalCase directory
+          if [[ "${{ matrix.service }}" == "analytics-service" ]]; then DIR="AnalyticsService"; fi
+          if [[ "${{ matrix.service }}" == "appointment-service" ]]; then DIR="AppointmentService"; fi
+          if [[ "${{ matrix.service }}" == "audit-logging-service" ]]; then DIR="AuditLoggingService"; fi
+          if [[ "${{ matrix.service }}" == "authentication-service" ]]; then DIR="AuthenticationService"; fi
+          if [[ "${{ matrix.service }}" == "billing-claims-service" ]]; then DIR="BillingClaimsService"; fi
+          if [[ "${{ matrix.service }}" == "config-server" ]]; then DIR="ConfigServer"; fi
+          if [[ "${{ matrix.service }}" == "gateway" ]]; then DIR="Gateway"; fi
+          if [[ "${{ matrix.service }}" == "inventory-service" ]]; then DIR="InventoryService"; fi
+          if [[ "${{ matrix.service }}" == "notification-service" ]]; then DIR="NotificationService"; fi
+          if [[ "${{ matrix.service }}" == "patient-service" ]]; then DIR="PatientService"; fi
+          if [[ "${{ matrix.service }}" == "pharmacy-service" ]]; then DIR="PharmacyService"; fi
+          if [[ "${{ matrix.service }}" == "service-registry" ]]; then DIR="ServiceRegistry"; fi
+          if [[ "${{ matrix.service }}" == "staff-service" ]]; then DIR="StaffService"; fi
+          echo "SERVICE_DIR=$DIR" >> $GITHUB_ENV
+          echo "REPO_NAME=healthcare-production-${{ matrix.service }}" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build, tag, and push image to Amazon ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ env.SERVICE_DIR }}
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.REPO_NAME }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/${{ env.REPO_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER }}
+
+      - name: Deploy to Amazon EKS
+        env:
+          ECR_REGISTRY: ${{ env.ECR_REGISTRY }}
+          REPO_NAME: ${{ env.REPO_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+          SERVICE: ${{ matrix.service }}
+        run: |
+          # Render the deployment file (assuming it's in k8s/ folder with name matching service)
+          # Note: We need to handle the fact that some deployment files might have subtle name differences
+          FILE="k8s/${SERVICE}-deployment.yaml"
+          if [[ ! -f "$FILE" ]]; then
+            # Try to find the file if it has non-standard hyphenation
+            FILE=$(find k8s/ -name "${SERVICE}*deployment.yaml" | head -n 1)
+          fi
+          
+          if [[ -f "$FILE" ]]; then
+            echo "Deploying $FILE..."
+            # Replace variables in the deployment manifest
+            envsubst < "$FILE" | kubectl apply -f -
+            # Also apply the service if it exists
+            SVC_FILE="${FILE/-deployment/-service}"
+            if [[ -f "$SVC_FILE" ]]; then
+               kubectl apply -f "$SVC_FILE"
+            fi
+          else
+            echo "Warning: Could not find deployment file for $SERVICE"
+          fi

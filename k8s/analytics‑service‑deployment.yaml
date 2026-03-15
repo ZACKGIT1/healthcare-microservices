@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: analytics-service
-          image: analytics-service:latest
+          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
           ports:
             - containerPort: 9091
           env:

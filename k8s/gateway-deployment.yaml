@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: gateway:latest
-          imagePullPolicy: Never  # Use local image in Minikube
+          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - containerPort: 9090
           env:

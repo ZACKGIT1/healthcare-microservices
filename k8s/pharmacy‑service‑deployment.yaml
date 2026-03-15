@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: pharmacy-service
-          image: <dockerhub-username>/pharmacy-service:latest
+          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
           ports:
             - containerPort: 9194
           env:

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: inventory-service
-          image: inventory-service:latest
+          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
           ports:
             - containerPort: 9099
           env:

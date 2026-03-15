@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: staff-service
-          image: <dockerhub-username>/staff-service:latest
+          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
           ports:
             - containerPort: 9196
           env:
