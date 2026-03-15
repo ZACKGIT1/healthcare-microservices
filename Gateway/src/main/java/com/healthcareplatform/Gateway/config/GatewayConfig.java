@@ -19,8 +19,9 @@ public class GatewayConfig {
                 // AuthController Routes (AuthenticationService)
                 .route("authentication_login_route", r -> r
                         .path("/login")
-                        .filters(f -> f.rewritePath("/login", "/api/v1/auth/public/login"))
+                        .filters(f -> f.rewritePath("/login", "/api/v1/auth/login"))
                         .uri("lb://" + authenticationService))
+
 
                 .route("auth_logout_route", r -> r
                         .path("/auth/logout")
