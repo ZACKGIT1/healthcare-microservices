@@ -54,6 +54,7 @@ jobs:
     if: ${{ needs.changes.outputs.services != '[]' }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         service: ${{ fromJson(needs.changes.outputs.services) }}
     steps:
