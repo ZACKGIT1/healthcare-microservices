@@ -31,14 +31,18 @@ public class SecurityConfig {
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .ignoringRequestMatchers(
                                 "/api/v1/auth/login",
-                                "api/v1/user/profile/**",
-                                "/api/v1/private/validateToken"));
+                                "/api/v1/user/profile/**",
+                                "/api/v1/private/validateToken",
+                                "/error"));
+
 
         http.authorizeHttpRequests(requests ->
                 requests
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/v1/user/profile/**").authenticated()
+
 
                         .anyRequest().authenticated());
         http.exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt));
