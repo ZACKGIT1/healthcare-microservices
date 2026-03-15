@@ -14,16 +14,24 @@ spec:
     spec:
       containers:
         - name: authentication-service
-          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
+          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-authentication-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
-            - name: SPRING_DATASOURCE_URL
+            - name: AUTHENTICATION_DRIVER_CLASS_NAME
+              value: org.postgresql.Driver
+            - name: AUTHENTICATION_DB_URL
               value: jdbc:postgresql://db-auth:5432/AuthenticationService
-            - name: SPRING_DATASOURCE_USERNAME
+            - name: AUTHENTICATION_DB_USERNAME
               value: postgres
-            - name: SPRING_DATASOURCE_PASSWORD
+            - name: AUTHENTICATION_DB_PASSWORD
               value: alwis
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: http://service-registry:8761/eureka
+            - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+              value: "true"
+            - name: EUREKA_CLIENT_FETCH_REGISTRY
+              value: "true"
+            - name: EUREKA_CLIENT_ENABLED
+              value: "true"

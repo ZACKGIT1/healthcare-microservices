@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: ${ECR_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
+          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-gateway:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 9090
