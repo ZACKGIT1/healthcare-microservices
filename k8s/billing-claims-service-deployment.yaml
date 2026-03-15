@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: billing-claims-service
-          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-billing-claims-service:latest
+          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-billing-claims-service:${IMAGE_TAG}
           ports:
             - containerPort: 9094
           env:

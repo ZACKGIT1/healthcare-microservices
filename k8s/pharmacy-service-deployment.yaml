@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: pharmacy-service
-          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-pharmacy-service:latest
+          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-pharmacy-service:${IMAGE_TAG}
           ports:
             - containerPort: 9194
           env:

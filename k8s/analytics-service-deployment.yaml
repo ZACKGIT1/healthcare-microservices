@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: analytics-service
-          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-analytics-service:latest
+          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-analytics-service:${IMAGE_TAG}
           ports:
             - containerPort: 9091
           env:

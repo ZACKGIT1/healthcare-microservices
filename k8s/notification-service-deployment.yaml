@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-notification-service:latest
+          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-notification-service:${IMAGE_TAG}
           ports:
             - containerPort: 9192
           env:

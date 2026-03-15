@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: audit-logging-service
-          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-audit-logging-service:latest
+          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-audit-logging-service:${IMAGE_TAG}
           ports:
             - containerPort: 9093
           env:

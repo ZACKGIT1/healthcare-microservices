@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: staff-service
-          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-staff-service:latest
+          image: 640083577712.dkr.ecr.us-east-1.amazonaws.com/healthcare-production-staff-service:${IMAGE_TAG}
           ports:
             - containerPort: 9196
           env:
