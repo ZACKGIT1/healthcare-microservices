@@ -19,7 +19,10 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: SPRING_CLOUD_VAULT_ENABLED
+              value: "false"
             - name: AUTHENTICATION_DRIVER_CLASS_NAME
+
               value: org.postgresql.Driver
             - name: AUTHENTICATION_DB_URL
               value: jdbc:postgresql://db-auth:5432/AuthenticationService
@@ -35,3 +38,7 @@ spec:
               value: "true"
             - name: EUREKA_CLIENT_ENABLED
               value: "true"
+            - name: USER_CREDENTIALS_EXPIRY_MONTHS
+              value: "3"
+            - name: USER_ACCOUNT_EXPIRY_MONTHS
+              value: "12"
